@@ -100,7 +100,7 @@ export default function page() {
                     }
                 </div>
             </div>
-            <div className='flex md:hidden flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-1/2'>
+            <div className='flex md:hidden flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-full'>
                 {
                     chapters.map((chap, idx) => {
                         return <div key={`chapter-${idx}`} className='w-full border-b-2 border-b-gray-200 hover:bg-cyan-50 dark:border-b-[#212729] cursor-pointer dark:hover:bg-[#21272980] py-1 px-2 overflow-hidden' onClick={() => routeChapter(chap.url)}>
@@ -109,7 +109,7 @@ export default function page() {
                     })
                 }
             </div>
-            <div className='w-full h-fit flex flex-row items-center justify-center gap-2 px-5 text-[0.8rem]'>
+            <div className='w-full h-fit flex flex-row items-center justify-center gap-2 px-5 text-[0.8rem] overflow-auto'>
                 {
                     paginations.map((page, idx) => {
                         return <div key={`pagination-${idx}`} className='cursor-pointer hover:underline p-2 px-3 rounded-xl bg-[#313739]/70' onClick={() => routeChapterList(page['url'])}>
