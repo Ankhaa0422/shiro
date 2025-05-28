@@ -37,7 +37,7 @@ export default function AuthProvider({ children }) {
 
     function login(password) {
         console.log('works')
-        if(password === process.env.password) {
+        if(password === 'RGFueWFAMjQ3') {
             setIsLoggedIn(true)
             setCookie('isLoggedIn', true) // Set cookie for 7 days
             router.push('/asura')
