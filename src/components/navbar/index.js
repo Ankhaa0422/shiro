@@ -46,9 +46,14 @@ export default function Navbar() {
                     </a>
                 ))}
                 <div className="flex w-full flex-col gap-4">
-                    {/* <NavbarButton onClick={() => setIsMobileMenuOpen(false)} variant="secondary" className="w-full" >
-                        Login
-                    </NavbarButton> */}
+                    {
+                        isLoggedIn && <NavbarButton variant="secondary" className="w-full" onClick={() => {
+                            logout()
+                            setIsMobileMenuOpen(false)
+                        }}>
+                            Login
+                        </NavbarButton>
+                    }
                     {/* <NavbarButton onClick={() => setIsMobileMenuOpen(false)} variant="primary" className="w-full" >
                         Book a call
                     </NavbarButton> */}
