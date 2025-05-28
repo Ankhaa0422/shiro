@@ -67,13 +67,22 @@ export default function Home() {
         }
     }
 
+    function handleLogin() {
+        const password = document.querySelector('input[type="password"]').value;
+        if (password) {
+            const encryptedValue = btoa(password);
+            login(encryptedValue);
+        }
+    }
+
     return <div className="flex flex-col gap-2 w-full h-screen items-center justify-center">
-        <div className="rounded-2xl w-[300px] h-[300px] bg-white/70 dark:bg-[#313739]/70 relative overflow-hidden p-5 flex flex-col items-center justify-center gap-4 shadow-2xl">
-            <div className="w-[150px] h-[150px] relative rounded-full">
+        <div className="rounded-2xl w-[300px] h-[350px] bg-white/70 dark:bg-[#313739]/70 relative overflow-hidden p-5 flex flex-col items-center justify-center gap-4 shadow-2xl">
+            <div className="min-w-[150px] min-h-[150px] relative rounded-full">
                 <Image src={sienna.src} alt="" fill style={{ objectFit: 'cover' }} className="rounded-full" />
             </div>
             <span>Shiro</span>
             <input type="password" onKeyDown={onKeyDown} placeholder="password" className="w-full h-[40px] px-4 rounded-full dark:bg-[#414749] bg-[#e3e3e3] outline-none focus:ring-2 focus:ring-[#e3e3e3]/30 transition-all" />
+            <button className="w-full h-[40px] px-4 rounded-full dark:bg-[#414749] bg-[#e3e3e3] outline-none focus:ring-2 focus:ring-[#e3e3e3]/30 transition-all" onClick={handleLogin}>login</button>
         </div>
     </div>
 }
