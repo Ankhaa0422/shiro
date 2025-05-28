@@ -80,7 +80,7 @@ export default function page() {
                     {latest['title']}
                 </div>
             </div>
-            <div className='flex flex-row gap-2 text-[0.8rem]'>
+            <div className='hidden md:flex flex-row gap-2 text-[0.8rem]'>
                 <div className='flex flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-1/2'>
                     {
                         chapters.filter((data, idx) => idx < 25).map((chap, idx) => {
@@ -99,6 +99,15 @@ export default function page() {
                         })
                     }
                 </div>
+            </div>
+            <div className='flex md:hidden flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-1/2'>
+                {
+                    chapters.map((chap, idx) => {
+                        return <div key={`chapter-${idx}`} className='w-full border-b-2 border-b-gray-200 hover:bg-cyan-50 dark:border-b-[#212729] cursor-pointer dark:hover:bg-[#21272980] py-1 px-2 overflow-hidden' onClick={() => routeChapter(chap.url)}>
+                            <span className='overflow-hidden text-ellipsis whitespace-nowrap'>{chap.name}</span>
+                        </div>
+                    })
+                }
             </div>
             <div className='w-full h-fit flex flex-row items-center justify-center gap-2 px-5 text-[0.8rem]'>
                 {
