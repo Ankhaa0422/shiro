@@ -40,7 +40,7 @@ export default function AuthProvider({ children }) {
         if(password === 'RGFueWFAMjQ3') {
             setIsLoggedIn(true)
             setCookie('isLoggedIn', true) // Set cookie for 7 days
-            router.push('/asura')
+            router.push('/martial-god-asura')
         }
     }
 

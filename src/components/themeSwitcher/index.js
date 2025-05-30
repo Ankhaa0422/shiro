@@ -16,14 +16,14 @@ export const ThemeSwitcherButton = () => {
                 className={`absolute top-0 left-0 z-10 h-full w-full transform-gpu rounded-full bg-linear-to-tr from-rose-400 to-amber-300 transition-color duration-500 dark:from-rose-600 dark:to-amber-600 ${theme === "light" ? "opacity-100" : "opacity-0"}`}/>
                 <span className={`absolute top-0 right-0 z-20 size-4 origin-top-right transform-gpu rounded-full bg-white transition-transform duration-500 group-hover:bg-neutral-100 dark:bg-neutral-800 dark:group-hover:bg-neutral-700 ${theme === "dark" ? "scale-100" : "scale-0"}`} />
             </span>
-            <span className="relative h-6 w-12">
+            {/* <span className="relative h-6 w-12">
                 <span className={`absolute top-0 left-0 transition-all duration-1000 ${theme === "light" ? "-translate-y-4 opacity-0 blur-lg" : "translate-y-0 opacity-100 blur-0"}`}>
                     Dark
                 </span>
                 <span className={`absolute top-0 left-0 transition-all duration-1000 ${theme === "dark" ? "translate-y-4 opacity-0 blur-lg" : "translate-y-0 opacity-100 blur-0"}`} >
                     Light
                 </span>
-            </span>
+            </span> */}
         </button>
     );
 };

@@ -1,5 +1,6 @@
 import { GoogleGenAI, HarmCategory, HarmBlockMethod, HarmBlockThreshold } from "@google/genai";
 import { isNullOrUndefined } from "@/utility";
+import { IconDivide } from "@tabler/icons-react";
 
 async function parse_url(url = '', callback) {
     try {
@@ -120,18 +121,17 @@ export async function get_novel_data(url) {
                 pagination_list: pagination_list
             })
         }
-        await parse_url(`${url}.html`, parser)
+        await parse_url(url.includes('.html') ? url : `${url}.html`, parser)
     })
 }
 
 
 function remove_ads (container) {
     const scriptedDiv = container.querySelectorAll('div')
+    console.log("scriptedDiv ===>", scriptedDiv, { container })
     scriptedDiv.forEach((div) => {
-        const scripted = div.querySelector('div[class^=ads]')
-        if(!isNullOrUndefined(scripted)) {
-            console.log("remove ads ===>", div, container)
-            container.removeChild(div)
+        if (container.contains(div)) {
+            container.removeChild(div);
         }
     })
     return container
@@ -214,42 +214,44 @@ const ai = new GoogleGenAI({ apiKey: 'AIzaSyCK93NvUnEW_JSIbbsluFr27hbgjv2uN-U' }
 
 const safetySettings = [
     {
-        harmCategory: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
+        category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
         threshold: HarmBlockThreshold.OFF,
     },
     {
-        harmCategory: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
         threshold: HarmBlockThreshold.OFF,
     },
     {
-        harmCategory: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
         threshold: HarmBlockThreshold.OFF,
     },
     {
-        harmCategory: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
         threshold: HarmBlockThreshold.OFF,
     },
     {
-        harmCategory: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
         threshold: HarmBlockThreshold.OFF,
     },
 ]
 
-export async function translate(content) {
+export async function translate(content, model = 'gemini-2.0-flash') {
     try {
         const response = await ai.models.generateContent({
-            // model: 'gemini-2.5-pro',
-            model: 'gemini-2.0-flash',
-            contents: content,
+            model: model === 'gemini-2.5-flash' ? 'gemini-2.5-flash-preview-05-20' : model,
+            contents: [{role: 'user', parts: [{text: content}]}],
             config: {
-                temperature: 1,
+                responseMimeType: 'text/plain',
                 systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML`,
-                topP: 0.95,
-                maxOutputTokens: 15000,
+                maxOutputTokens: 65536,
+                thinkingConfig: {
+                    includeThoughts: false,
+                },
+                safetySettings: safetySettings,
             },
             safetySettings: safetySettings,
         });
-        console.log("response ===>", await response['text'])
+        
         let returnValue = {
             status: 200,
             content: await response['text']
