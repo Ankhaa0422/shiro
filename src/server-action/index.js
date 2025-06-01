@@ -242,7 +242,7 @@ export async function translate(content, model = 'gemini-2.0-flash') {
             contents: [{role: 'user', parts: [{text: content}]}],
             config: {
                 responseMimeType: 'text/plain',
-                systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML`,
+                systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML doesn't change tags`,
                 maxOutputTokens: 65536,
                 thinkingConfig: {
                     includeThoughts: false,
