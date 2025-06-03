@@ -25,7 +25,7 @@ export default function Read({ params }) {
         defaultValue: '100',
         getInitialValueInEffect: true,
     })
-    const [page_font, setPageFont] = useState('"Times New Roman", Times, serif')
+    const [page_font, setPageFont] = useState('Arial, sans-serif')
     
     useEffect(() => {
         async function getData() {
@@ -62,53 +62,6 @@ export default function Read({ params }) {
             if(!isNullOrUndefined(data?.next_chapter)) router.push(`/read/${data?.next_chapter.replace('.html', '')}`)
         }
     }
-
-    // function makeCunksOfText(arr:any) {
-    //     const maxLength = 190;
-    //     let speechChunks:any[] = [];
-    //     // while (text.length > 0) {
-    //     //     if (text.length <= maxLength) {
-    //     //         speechChunks.push(text);
-    //     //         break;
-    //     //     }
-    //     //     let chunk = text.substring(0, maxLength + 1);
-    //     //     let lastSpaceIndex = chunk.lastIndexOf(' ');
-    //     //     if (lastSpaceIndex !== -1) {
-    //     //         speechChunks.push(text.substring(0, lastSpaceIndex));
-    //     //         text = text.substring(lastSpaceIndex + 1);
-    //     //     } else {
-    //     //         speechChunks.push(text.substring(0, maxLength));
-    //     //         text = text.substring(maxLength);
-    //     //     }
-    //     // }
-
-    //     arr?.forEach((x:any) => {
-    //         speechChunks.push(x.textContent)
-    //     })
-
-    //     return speechChunks
-    // }
-
-    // async function speak() {
-    //     const speechChunks:any[] = makeCunksOfText(document.getElementById('content')?.childNodes || [])
-    //     for (let i = 0; i < speechChunks.length; i++) {
-    //         await new Promise((resolve, reject) => {
-    //             window.speechSynthesis.cancel();
-    //             let speech = new SpeechSynthesisUtterance(speechChunks[i]);
-    //             speech.rate = 0.95;
-    //             speech.voice = window.speechSynthesis.getVoices()[1];
-    //             window.speechSynthesis.speak(speech);
-    //             speech.onend = (end) => {
-    //                 console.log("end ===>", end)
-    //                 resolve('');
-    //             };
-    //             speech.onerror = (error) => {
-    //                 console.log("error ===>", error)
-    //                 resolve('');
-    //             };
-    //         });
-    //     }
-    // }
 
     function test(e) {
         console.log(e.target.value)
@@ -147,7 +100,7 @@ export default function Read({ params }) {
                     style={{
                         width: `${page_width}%`,
                         fontFamily: page_font,
-                        fontSize: '0.85rem',
+                        fontSize: '0.95rem',
                     }}
                 />
                     { isTranslate && <Loader className='!bg-[#212729]/50 backdrop-blur-sm' /> }
