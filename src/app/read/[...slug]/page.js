@@ -26,12 +26,23 @@ export default function Read({ params }) {
         getInitialValueInEffect: true,
     })
     const [page_font, setPageFont] = useState('Arial, sans-serif')
-    
+    const [previousChapter, setPreviousChapter] = useLocalStorage({
+        key: 'previousContent',
+        defaultValue: undefined
+    })
+    const [nextChapter, setNextChapter] = useLocalStorage({
+        key: 'nextChapter',
+        defaultValue: undefined
+    })
+    const [isSetted, setIsSetted] = useState(false)
+
+
     useEffect(() => {
         async function getData() {
             try {
                 setIsLoading(true)
                 const { slug } = await params
+                console.log("nextChapter ===>", nextChapter)
                 const response = await get_chapter_data(slug || '')
                 setData(response)
                 setLatest({
@@ -46,6 +57,21 @@ export default function Read({ params }) {
     }, [router])
 
     useEffect(() => {
+        async function getNext() {
+            if(!isNullOrUndefined(nextChapter)) {
+                const { slug } = await params
+                setData(nextChapter)
+                setLatest({
+                    url: `${slug.join('/')}`,
+                    title: nextChapter['chapter_title']
+                })
+                // getAndTranslateNextChapter(nextChapter)
+            }
+        }
+        getNext()
+    }, [nextChapter])
+
+    useEffect(() => {
         window.addEventListener('scroll', onScroll)
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
@@ -57,14 +83,15 @@ export default function Read({ params }) {
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
         if(isPrev) {
+            setNextChapter(data)
             if(!isNullOrUndefined(data?.prev_chapter)) router.push(`/read/${data?.prev_chapter.replace('.html', '')}`)
         } else {
+            setPreviousChapter(data)
             if(!isNullOrUndefined(data?.next_chapter)) router.push(`/read/${data?.next_chapter.replace('.html', '')}`)
         }
     }
 
     function test(e) {
-        console.log(e.target.value)
         setPageWidth(e.target.value)
     }
 
@@ -72,7 +99,6 @@ export default function Read({ params }) {
         if(isNullOrUndefined(data?.content)) return null
         setIsTranslate(true)
         const response = await translate(data?.content, model)
-        console.log('response ===>', response)
         if(response?.status === 200 && !isNullOrUndefined(response['content'])) {
             if(response['content'] === data?.content) {
                 setIsTranslate(false)
@@ -80,10 +106,32 @@ export default function Read({ params }) {
             }
             setData({
                 ...data,
-                content: response['content'],
+                mnContent: response['content'],
             })
         }
+        // getAndTranslateNextChapter(data)
         setIsTranslate(false)
+    }
+
+    async function getAndTranslateNextChapter(current = data) {
+        const response = await get_chapter_data(current?.next_chapter.replace('.html', '').split('/') || '')
+        console.log(response)
+        const translated = await translate(response?.content, model, true)
+        if(translated?.status === 200 && !isNullOrUndefined(translated['content'])) {
+            if(translated['content'] === data?.content) {
+                setIsTranslate(false)
+                return null
+            }
+            setNextChapter({
+                ...response,
+                mnContent: translated['content']
+            })
+        } else {
+            setNextChapter({
+                ...response
+            })
+        }
+        
     }
 
     return <section className='w-full container mx-auto flex flex-col items-center mb-[60px] mt-[60px] lg:mt-[60px] lg:mb-[20px] px-5 md:px-10 relative font-serif'>
@@ -95,7 +143,7 @@ export default function Read({ params }) {
                 </div>
                 <div 
                     id={'content'} 
-                    dangerouslySetInnerHTML={{__html: data?.content}} 
+                    dangerouslySetInnerHTML={{__html: data?.mnContent || data?.content}} 
                     className='flex flex-col gap-5 [&_h1]:font-semibold [&_h4]:font-semibold [&_h1]:text-xl [&_hr]:border-[#313739] [&_h1]:px-5 [&_p]:cursor-pointer [&_p]:px-3 [&_p]:py-1 min-w-full w-full sm:min-w-[420px] '
                     style={{
                         width: `${page_width}%`,

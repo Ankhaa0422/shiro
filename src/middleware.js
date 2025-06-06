@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 // This function can be marked `async` if using `await` inside
 export function middleware(request) {
     const cookies = request.cookies.get('isLoggedIn');
-    if(!checkAuth(request) && request.nextUrl.pathname !== '/') {
+    if(!checkAuth(request) && request.nextUrl.pathname !== '/' && !request.nextUrl.pathname.includes('/api')) {
         const url = request.nextUrl.clone()
         url.pathname = '/'
         return NextResponse.redirect(url)
