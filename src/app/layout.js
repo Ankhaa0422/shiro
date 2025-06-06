@@ -3,6 +3,8 @@ import "./globals.css";
 import ThemeProvider from "@/providers/ThemeProvider";
 import { Navbar } from "@/components";
 import AuthProvider from "@/providers/AuthProvider";
+import { Toaster } from "sonner";
+
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
@@ -27,6 +29,17 @@ export default function RootLayout({ children }) {
                     <main className="w-full h-fit flex flex-col gap-2">
                         {children}
                     </main>
+                    <Toaster
+                        position="bottom-right"
+                        richColors
+                        closeButton
+                        toastOptions={{
+                            className: "bg-[#212729] dark:bg-[#efefef] text-[#efefef] dark:text-[#212729]",
+                            style: {
+                                fontFamily: "var(--font-geist-sans)",
+                            },
+                        }}
+                    />
                 </ThemeProvider>
             </AuthProvider>
         </body>

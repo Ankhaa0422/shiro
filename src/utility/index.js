@@ -55,9 +55,9 @@ export async function callFetch(api, param, type = 'POST') {
     }
 }
 
-export function connectIDB(tableName) {
+export function connectIDB(tableNames = ['content']) {
     try {
-        const request = indexedDB.open(dbName, 1)
+        const request = indexedDB.open('content', 1)
 
         request.onerror = (error) => {
             console.error("error =====>", error)
@@ -78,14 +78,14 @@ export function connectIDB(tableName) {
     }
 }
 
-export async function getNextChapter() {
-    let req = await connectIDB('content')
+export async function getChapter(key = 'nextChapter') {
+    let req = await connectIDB()
     return new Promise(resolve => {
         req.onsuccess = function (e) {
             const db = req.result
             const trans = db.transaction('content', 'readonly')
             const ctx = trans.objectStore('content')
-            const get_request = ctx.get('nextChapter')
+            const get_request = ctx.get(key)
             get_request.onsuccess = e => {
                 resolve(get_request.result)
             }
@@ -95,21 +95,21 @@ export async function getNextChapter() {
     })
 }
 
-export async function setNextChapter(chap) {
-    const isHaveNextChapter = await getNextChapter()
-    let req = connectIDB('content')
+export async function setChapter(chap, key = 'nextChapter') {
+    const isHaveNextChapter = await getChapter(key)
+    let req = connectIDB()
     return new Promise(resolve => {
         req.onsuccess = () => {
             const db = req.result
             const trans = db.transaction('content', 'readwrite')
             const ctx = trans.objectStore('content')
             if(isHaveNextChapter) {
-                const update_request = ctx.put(chap, 'nextChapter')
+                const update_request = ctx.put(chap, key)
                 update_request.onsuccess = () => {
                     resolve({ message: 'update success', success: true })
                 }
             } else {
-                const add_request = ctx.add(chap, 'nextChapter')
+                const add_request = ctx.add(chap, key)
                 add_request.onsuccess = (e) => {
                     resolve({ message: 'add success', success: true })
                 }
@@ -118,28 +118,4 @@ export async function setNextChapter(chap) {
     }).catch(e => {
         console.log(e)
     })
-}
-
-export async function tailangiinZagvarKhadgalya(zagvar, callbacks, tableName = 'tailangiinZagvar', drillEsekh = false, systemiinTokhirgooEsekh = false) {
-    const { onSuccess, onError } = callbacks || {}
-    const oldDataBaigaaEsekh = await tailangiinZagvarAvya(zagvar, undefined, undefined, drillEsekh)
-        let req = await indexedDBKholbogdyo(tableName);
-        req.onsuccess = (e) => {
-            const db = req.result
-            const trans = db.transaction(tableName, 'readwrite')
-            const ctx = trans.objectStore(tableName)
-            if(oldDataBaigaaEsekh) {
-                const updateRequest = ctx.put(zagvar, indexedDbKeyUgsarya(zagvar, drillEsekh))
-                updateRequest.onsuccess= (e) => {
-                    console.log('Zagvariig amjilttai shinechillee')
-                }
-            } else {
-                const addRequest = ctx.add(zagvar, indexedDbKeyUgsarya(zagvar, drillEsekh))
-                addRequest.onsuccess = (e) => {
-                    onSuccess?.()
-                }
-            }
-            
-        };
-    
 }

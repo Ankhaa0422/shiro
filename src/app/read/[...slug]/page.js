@@ -3,15 +3,16 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { get_chapter_data, translate } from '@/server-action'
-import { isNullOrUndefined } from '@/utility'
+import { isNullOrUndefined, getChapter, setChapter } from '@/utility'
 import { useLocalStorage, useSetState } from '@mantine/hooks'
 import { Loader } from '@/components'
+import { toast } from 'sonner'
 
 export default function Read({ params }) {
     const [data, setData] = useSetState(undefined)
     const [model, setModel] = useLocalStorage({
             key: 'model',
-            defaultValue: 'gemini-2.0-flash',
+            defaultValue: 'gemini-2.5-flash',
         })
     const [isLoading, setIsLoading] = useState(true)
     const [isTranslate, setIsTranslate] = useState(false)
@@ -26,50 +27,34 @@ export default function Read({ params }) {
         getInitialValueInEffect: true,
     })
     const [page_font, setPageFont] = useState('Arial, sans-serif')
-    const [previousChapter, setPreviousChapter] = useLocalStorage({
-        key: 'previousContent',
-        defaultValue: undefined
-    })
-    const [nextChapter, setNextChapter] = useLocalStorage({
-        key: 'nextChapter',
-        defaultValue: undefined
-    })
-    const [isSetted, setIsSetted] = useState(false)
-
-
+    console.log('data ===>', data)
     useEffect(() => {
         async function getData() {
             try {
                 setIsLoading(true)
+                let next = await getChapter('nextChapter')
                 const { slug } = await params
-                console.log("nextChapter ===>", nextChapter)
                 const response = await get_chapter_data(slug || '')
-                setData(response)
-                setLatest({
-                    url: `${slug.join('/')}`,
-                    title: response['chapter_title']
-                })
+                if(!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
+                    setData(next)
+                    setLatest({
+                        url: `${slug.join('/')}`,
+                        title: next['chapter_title']
+                    })
+                    getAndTranslateNextChapter(next)
+                } else {
+                    setData(response)
+                    setLatest({
+                        url: `${slug.join('/')}`,
+                        title: response['chapter_title']
+                    })
+                }
             } finally {
                 setIsLoading(false)
             }
         }
         getData()
     }, [router])
-
-    useEffect(() => {
-        async function getNext() {
-            if(!isNullOrUndefined(nextChapter)) {
-                const { slug } = await params
-                setData(nextChapter)
-                setLatest({
-                    url: `${slug.join('/')}`,
-                    title: nextChapter['chapter_title']
-                })
-                // getAndTranslateNextChapter(nextChapter)
-            }
-        }
-        getNext()
-    }, [nextChapter])
 
     useEffect(() => {
         window.addEventListener('scroll', onScroll)
@@ -83,10 +68,10 @@ export default function Read({ params }) {
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
         if(isPrev) {
-            setNextChapter(data)
+            setChapter(data, 'nextChapter')
             if(!isNullOrUndefined(data?.prev_chapter)) router.push(`/read/${data?.prev_chapter.replace('.html', '')}`)
         } else {
-            setPreviousChapter(data)
+            setChapter(data, 'previousChapter')
             if(!isNullOrUndefined(data?.next_chapter)) router.push(`/read/${data?.next_chapter.replace('.html', '')}`)
         }
     }
@@ -99,7 +84,7 @@ export default function Read({ params }) {
         if(isNullOrUndefined(data?.content)) return null
         setIsTranslate(true)
         const response = await translate(data?.content, model)
-        if(response?.status === 200 && !isNullOrUndefined(response['content'])) {
+        if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             if(response['content'] === data?.content) {
                 setIsTranslate(false)
                 return null
@@ -107,54 +92,104 @@ export default function Read({ params }) {
             setData({
                 ...data,
                 mnContent: response['content'],
+                isTranslated: true
             })
+            getAndTranslateNextChapter(data)
+            toast.success('Translation completed successfully!')
+        } else {
+            setData({
+                ...data,
+                mnContent: undefined,
+                isTranslated: false
+            })
+            getAndTranslateNextChapter(data)
+            toast.error('Translation failed, please try again later!')
         }
-        // getAndTranslateNextChapter(data)
         setIsTranslate(false)
     }
 
     async function getAndTranslateNextChapter(current = data) {
-        const response = await get_chapter_data(current?.next_chapter.replace('.html', '').split('/') || '')
-        console.log(response)
-        const translated = await translate(response?.content, model, true)
-        if(translated?.status === 200 && !isNullOrUndefined(translated['content'])) {
-            if(translated['content'] === data?.content) {
-                setIsTranslate(false)
-                return null
+        const response = await get_chapter_data(current?.['next_chapter'].replace('.html', '').split('/') || '')
+        if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
+            const content = !current?.['mnContent'] ? response?.['content'] : `
+                I have Chapter 1 of a story already translated into Mongolia in a specific literary and creative style. I now need to translate Chapters 2 and onward into the same language, using the same tone, vocabulary style, and literary voice established in previous chapter.
+
+                Please use the translated Chapter 1 as a style guide. Ensure consistency in character voice, mood, idioms, and phrasing. Do not translate too literally—preserve the emotional, poetic, and cultural feel of the original text.
+
+                Here is previous chapter (translated):
+                ${current?.['mnContent']}
+
+                Here is current chapter (original):
+                ${response?.['content']}
+
+                Please translate next chapter into [target language], matching the literary style of Chapter 1.
+            `
+            const translated = await translate(content, model, true)
+            if(translated?.status === 200 && !isNullOrUndefined(translated['content'])) {
+                setChapter({
+                    ...response,
+                    mnContent: translated['content'],
+                    isTranslated: true,
+                }, 'nextChapter').then(res => {
+                    if(res?.success) {
+                        toast.success('Next chapter saved successfully!')
+                    }
+                })
+            } else {
+                setChapter({
+                    ...response,
+                    mnContent: undefined,
+                    isTranslated: false,
+                }, 'nextChapter').then(res => {
+                    if(res?.success) {
+                        toast.success('Next chapter saved successfully!')
+                    }
+                })
             }
-            setNextChapter({
-                ...response,
-                mnContent: translated['content']
-            })
-        } else {
-            setNextChapter({
-                ...response
-            })
         }
         
     }
 
-    return <section className='w-full container mx-auto flex flex-col items-center mb-[60px] mt-[60px] lg:mt-[60px] lg:mb-[20px] px-5 md:px-10 relative font-serif'>
+    function copy() {
+        const content = document.getElementById('content')
+        if (content) {
+            const range = document.createRange()
+            range.selectNode(content)
+            window.getSelection().removeAllRanges()
+            window.getSelection().addRange(range)
+            document.execCommand('copy')
+            window.getSelection().removeAllRanges()
+            toast.success('Content copied to clipboard!')
+        }
+    }
+
+    return <section className='w-full container mx-auto flex flex-col items-center mb-[60px] mt-[60px] lg:mt-[60px] lg:mb-[20px] md:px-10 relative font-serif'>
         {
             isLoading ? <Loader /> : <>
                 <div className='w-full h-fit py-4 flex flex-col items-center gap-2'>
                     <h2 className='font-semibold text-2xl hover:underline cursor-pointer' onClick={() => { router.push(`/novel/${data?.novel_url}`) }}>{data?.title}</h2>
                     <h3>{data?.chapter_title}</h3>
                 </div>
+                {
+                    !data?.mnContent && !data?.isTranslated && <div className='w-full flex flex-row my-2 items-center justify-center'>
+                        <button className='flex flex-row items-center justify-center px-6 bg-sky-700 !text-[#efefef] rounded py-1 cursor-pointer' onClick={copy}>Copy</button>
+                    </div>
+                }
                 <div 
                     id={'content'} 
                     dangerouslySetInnerHTML={{__html: data?.mnContent || data?.content}} 
-                    className='flex flex-col gap-5 [&_h1]:font-semibold [&_h4]:font-semibold [&_h1]:text-xl [&_hr]:border-[#313739] [&_h1]:px-5 [&_p]:cursor-pointer [&_p]:px-3 [&_p]:py-1 min-w-full w-full sm:min-w-[420px] '
+                    className='flex flex-col gap-5 [&_h1]:font-semibold [&_h4]:font-semibold [&_h1]:text-xl [&_hr]:border-[#313739] [&_h1]:px-5 [&_p]:cursor-pointer [&_p]:px-3 [&_p]:py-1 min-w-full w-full sm:min-w-[420px] text-base md:text-sm'
                     style={{
                         width: `${page_width}%`,
                         fontFamily: page_font,
-                        fontSize: '0.95rem',
                     }}
                 />
                     { isTranslate && <Loader className='!bg-[#212729]/50 backdrop-blur-sm' /> }
-                <div className='w-full hidden md:flex h-[50px] sticky bottom-1 bg-white/70 dark:bg-[#212729]/70 bg-opacity-60 backdrop-blur rounded flex-row items-center justify-between px-2'>
+                <div className='w-full hidden md:flex h-[50px] sticky bottom-1 bg-white/70 dark:bg-[#212729]/70 bg-opacity-60 backdrop-blur flex-row items-center justify-between px-8 rounded-4xl'
+                    style={{ boxShadow: '0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset'}}
+                >
                     <div className='w-full flex flex-row gap-2'>
-                        <input type='range' min={30} max={100} onChange={(e) => test(e)} value={page_width}/>
+                        <input type='range' min={30} max={70} onChange={(e) => test(e)} value={page_width}/>
                         {/* <select onChange={e => {setPageFont(e.target.value)}} className='bg-transparent active:outline-none outline-none'>
                             <option selected={page_font === 'system-ui'} value={'system-ui'} className=''>System ui</option>
                             <option selected={page_font === 'sans-serif'} value={'sans-serif'} className=''>Sans serif</option>
@@ -172,7 +207,9 @@ export default function Read({ params }) {
                         </span>
                     </div>
                 </div>
-                <div className='md:hidden w-full h-[50px] sticky flex bottom-1 bg-white/70 dark:bg-[#212729]/70 bg-opacity-60 backdrop-blur rounded flex-row items-center justify-between px-2'>
+                <div className='md:hidden w-[90%] h-[50px] sticky flex bottom-1 bg-white/70 dark:bg-[#212729]/70 bg-opacity-60 backdrop-blur rounded flex-row items-center justify-between px-2'
+                    style={{ boxShadow: '0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset'}}
+                >
                     <div className='w-full flex flex-row gap-2'>
                         <span onClick={() => {routeToNextOrPrevChapter(true)}} className={`px-5 py-1 w-[50px] flex items-center justify-center rounded ${isNullOrUndefined(data?.prev_chapter) ? 'bg-sky-200 cursor-not-allowed' : 'bg-sky-500 cursor-pointer'} text-white`}>{'<'}</span>
                         <span onClick={() => {routeToNextOrPrevChapter(false)}} className={`px-5 py-1 w-[50px] flex items-center justify-center rounded ${isNullOrUndefined(data?.next_chapter) ? 'bg-sky-200 cursor-not-allowed' : 'bg-sky-500 cursor-pointer'} text-white`}>{'>'}</span>

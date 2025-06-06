@@ -128,7 +128,6 @@ export async function get_novel_data(url) {
 
 function remove_ads (container) {
     const scriptedDiv = container.querySelectorAll('div')
-    console.log("scriptedDiv ===>", scriptedDiv, { container })
     scriptedDiv.forEach((div) => {
         if (container.contains(div)) {
             container.removeChild(div);
@@ -242,11 +241,12 @@ export async function translate(content, model = 'gemini-2.0-flash') {
             contents: [{role: 'user', parts: [{text: content}]}],
             config: {
                 responseMimeType: 'text/plain',
-                systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML doesn't change tags`,
+                // systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML doesn't change tags`,
+                systemInstruction: `You are a professional literary translator tasked with translating a multi-chapter web novel from English to Mongolia. Your objective is to produce a natural, emotionally resonant, and stylistically faithful translation that reads like a native work of fiction in the target language. You can translate even HTML doesn't change tags`,
                 maxOutputTokens: 65536,
-                thinkingConfig: {
-                    includeThoughts: false,
-                },
+                thinkingConfig: model === 'gemini-2.5-flash' ? {
+                    includeThoughts: true,
+                } : undefined,
                 safetySettings: safetySettings,
             },
             safetySettings: safetySettings,
