@@ -7,6 +7,7 @@ import { isNullOrUndefined, getChapter, setChapter } from '@/utility'
 import { useLocalStorage, useSetState } from '@mantine/hooks'
 import { Loader } from '@/components'
 import { toast } from 'sonner'
+import _ from 'lodash'
 
 export default function Read({ params }) {
     const [data, setData] = useSetState(undefined)
@@ -33,21 +34,41 @@ export default function Read({ params }) {
             try {
                 setIsLoading(true)
                 let next = await getChapter('nextChapter')
+                let current = await getChapter('currentChapter')
+                let previous = await getChapter('previousChapter')
                 const { slug } = await params
                 const response = await get_chapter_data(slug || '')
-                if(!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
+                if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
                     setData(next)
                     setLatest({
                         url: `${slug.join('/')}`,
                         title: next['chapter_title']
                     })
+                    setChapter(next, 'currentChapter')
                     getAndTranslateNextChapter(next)
+                } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
+                    setData(current)
+                    setLatest({
+                        url: `${slug.join('/')}`,
+                        title: current['chapter_title']
+                    })
+                    setChapter(current, 'currentChapter')
+                    // getAndTranslateNextChapter(current)
+                } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
+                    setData(previous)
+                    setLatest({
+                        url: `${slug.join('/')}`,
+                        title: previous['chapter_title']
+                    })
+                    setChapter(previous, 'currentChapter')
+                    // getAndTranslateNextChapter(previous)
                 } else {
                     setData(response)
                     setLatest({
                         url: `${slug.join('/')}`,
                         title: response['chapter_title']
                     })
+                    setChapter(response, 'currentChapter')
                 }
             } finally {
                 setIsLoading(false)
@@ -89,20 +110,26 @@ export default function Read({ params }) {
                 setIsTranslate(false)
                 return null
             }
-            setData({
+            let translatedData = {
                 ...data,
                 mnContent: response['content'],
                 isTranslated: true
-            })
-            getAndTranslateNextChapter(data)
+            }
+            setData(translatedData)
+            setTimeout(() => {
+                getAndTranslateNextChapter(translatedData)
+            }, 100)
             toast.success('Translation completed successfully!')
         } else {
-            setData({
+            let translatedData = {
                 ...data,
                 mnContent: undefined,
                 isTranslated: false
-            })
-            getAndTranslateNextChapter(data)
+            }
+            setData(translatedData)
+            setTimeout(() => {
+                getAndTranslateNextChapter(translatedData)
+            }, 100)
             toast.error('Translation failed, please try again later!')
         }
         setIsTranslate(false)
@@ -112,9 +139,9 @@ export default function Read({ params }) {
         const response = await get_chapter_data(current?.['next_chapter'].replace('.html', '').split('/') || '')
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             const content = !current?.['mnContent'] ? response?.['content'] : `
-                I have Chapter 1 of a story already translated into Mongolia in a specific literary and creative style. I now need to translate Chapters 2 and onward into the same language, using the same tone, vocabulary style, and literary voice established in previous chapter.
+                I have previous of a story already translated into Mongolia in a specific literary and creative style. I now need to translate Current chapter and onward into the same language, using the same tone, vocabulary style, and literary voice established in previous chapter.
 
-                Please use the translated Chapter 1 as a style guide. Ensure consistency in character voice, mood, idioms, and phrasing. Do not translate too literally—preserve the emotional, poetic, and cultural feel of the original text.
+                Please use the translated previous as a style guide. Ensure consistency in character voice, mood, idioms, and phrasing. Do not translate too literally—preserve the emotional, poetic, and cultural feel of the original text.
 
                 Here is previous chapter (translated):
                 ${current?.['mnContent']}
@@ -122,7 +149,7 @@ export default function Read({ params }) {
                 Here is current chapter (original):
                 ${response?.['content']}
 
-                Please translate next chapter into [target language], matching the literary style of Chapter 1.
+                Please translate next chapter into Mongolia, matching the literary style of previous.
             `
             const translated = await translate(content, model, true)
             if(translated?.status === 200 && !isNullOrUndefined(translated['content'])) {
