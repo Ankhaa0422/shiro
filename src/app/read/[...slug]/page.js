@@ -7,6 +7,7 @@ import { isNullOrUndefined, getChapter, setChapter } from '@/utility'
 import { useLocalStorage, useSetState } from '@mantine/hooks'
 import { Loader } from '@/components'
 import { toast } from 'sonner'
+import { setCookie } from '@/lib'
 
 export default function Read({ params }) {
     const [data, setData] = useSetState(undefined)
@@ -205,7 +206,7 @@ export default function Read({ params }) {
                 <div 
                     id={'content'} 
                     dangerouslySetInnerHTML={{__html: data?.mnContent || data?.content}} 
-                    className='flex flex-col gap-5 [&_h1]:font-semibold [&_h4]:font-semibold [&_h1]:text-xl [&_hr]:border-[#313739] [&_h1]:px-5 [&_p]:cursor-pointer [&_p]:px-3 [&_p]:py-1 min-w-full w-full sm:min-w-[420px] text-base md:text-sm'
+                    className='flex flex-col gap-5 mb-8 [&_h1]:font-semibold [&_h4]:font-semibold [&_h1]:text-xl [&_hr]:border-[#313739] [&_h1]:px-5 [&_p]:cursor-pointer [&_p]:px-3 [&_p]:py-1 min-w-full w-full sm:min-w-[420px] text-base md:text-sm'
                     style={{
                         width: `${page_width}%`,
                         fontFamily: page_font,
