@@ -7,7 +7,6 @@ import { isNullOrUndefined, getChapter, setChapter } from '@/utility'
 import { useLocalStorage, useSetState } from '@mantine/hooks'
 import { Loader } from '@/components'
 import { toast } from 'sonner'
-import _ from 'lodash'
 
 export default function Read({ params }) {
     const [data, setData] = useSetState(undefined)
@@ -76,11 +75,6 @@ export default function Read({ params }) {
         }
         getData()
     }, [router])
-
-    useEffect(() => {
-        window.addEventListener('scroll', onScroll)
-        return () => window.removeEventListener('scroll', onScroll)
-    }, [])
 
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
