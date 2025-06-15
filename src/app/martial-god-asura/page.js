@@ -26,7 +26,7 @@ export default function page() {
                 setIsLoading(true)
                 // const urlParams = new URLSearchParams(window.location.search);
                 const page = queryParam.get('page');
-                console.log('page', page)
+                
                 let url = pathname
                 if(!isNullOrUndefined(page)) {
                     url = `${url}.html?page=${page}`

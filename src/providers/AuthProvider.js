@@ -40,7 +40,10 @@ export default function AuthProvider({ children }) {
             setIsLoad(true)
             let khariu = await callFetch('/api/login', { password })
             if(khariu['success']) {
-                router.push('/martial-god-asura')
+                setTimeout(() => {
+                    setIsLoggedIn(true)
+                    router.push('/martial-god-asura')
+                }, 100)
             }
         } finally {
             setIsLoad(false)

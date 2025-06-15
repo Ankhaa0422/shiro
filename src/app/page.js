@@ -6,12 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 
-// Uncomment and import these if you want to use the commented-out home page sections
-// import bg2 from '../../public/bg2.png'
-// import bg from '../../public/bg.png'
-// import { motion } from "framer-motion";
-// import Card from "@/components/Card";
-
 export default function Home() {
     const { isLoggedIn, login } = useAuth()
     const router = useRouter()

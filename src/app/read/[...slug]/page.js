@@ -82,12 +82,11 @@ export default function Read({ params }) {
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
 
-    function onScroll(event) {
-        console.log(event.target.clientHeight)
-    }
-
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
+
+        setCookie('isLoggedIn', true, 12 * 60 * 60)
+
         if(isPrev) {
             setChapter(data, 'nextChapter')
             if(!isNullOrUndefined(data?.prev_chapter)) router.push(`/read/${data?.prev_chapter.replace('.html', '')}`)
@@ -135,7 +134,7 @@ export default function Read({ params }) {
         setIsTranslate(false)
     }
 
-    async function getAndTranslateNextChapter(current = data) {
+    async function getAndTranslateNextChapter(current = data, attempt = 0) {
         const response = await get_chapter_data(current?.['next_chapter'].replace('.html', '').split('/') || '')
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             const content = !current?.['mnContent'] ? response?.['content'] : `
@@ -149,7 +148,7 @@ export default function Read({ params }) {
                 Here is current chapter (original):
                 ${response?.['content']}
 
-                Please translate next chapter into Mongolia, matching the literary style of previous.
+                Please translate next chapter into Mongolia, matching the literary style of previous. You can translate even HTML doesn't change tags
             `
             const translated = await translate(content, model, true)
             if(translated?.status === 200 && !isNullOrUndefined(translated['content'])) {
@@ -163,15 +162,22 @@ export default function Read({ params }) {
                     }
                 })
             } else {
-                setChapter({
-                    ...response,
-                    mnContent: undefined,
-                    isTranslated: false,
-                }, 'nextChapter').then(res => {
-                    if(res?.success) {
-                        toast.success('Next chapter saved successfully!')
-                    }
-                })
+                if(attempt < 3) {
+                    setTimeout(() => {
+                        getAndTranslateNextChapter(current, attempt + 1)
+                    }, 1000)
+                } else {
+                    toast.error('Translation failed, please try again later!')
+                    setChapter({
+                        ...response,
+                        mnContent: undefined,
+                        isTranslated: false,
+                    }, 'nextChapter').then(res => {
+                        if(res?.success) {
+                            toast.success('Next chapter saved successfully!')
+                        }
+                    })
+                }
             }
         }
         
@@ -217,11 +223,6 @@ export default function Read({ params }) {
                 >
                     <div className='w-full flex flex-row gap-2'>
                         <input type='range' min={30} max={70} onChange={(e) => test(e)} value={page_width}/>
-                        {/* <select onChange={e => {setPageFont(e.target.value)}} className='bg-transparent active:outline-none outline-none'>
-                            <option selected={page_font === 'system-ui'} value={'system-ui'} className=''>System ui</option>
-                            <option selected={page_font === 'sans-serif'} value={'sans-serif'} className=''>Sans serif</option>
-                            <option selected={page_font === 'serif'} value={'serif'} className=''>Serif</option>
-                        </select> */}
                     </div>
                     <div className='w-full flex flex-row gap-2'>
                         <span onClick={() => {routeToNextOrPrevChapter(true)}} className={`px-5 py-1 w-[170px] text-[0.8rem] flex items-center justify-center rounded ${isNullOrUndefined(data?.prev_chapter) ? 'bg-sky-200 cursor-not-allowed' : 'bg-sky-500 cursor-pointer'} text-white`}>Prev chapter</span>
