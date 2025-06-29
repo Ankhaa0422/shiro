@@ -45,7 +45,9 @@ export default function Read({ params }) {
                         title: next['chapter_title']
                     })
                     setChapter(next, 'currentChapter')
-                    getAndTranslateNextChapter(next)
+                    if(!isNullOrUndefined(next?.mnContent)) {
+                        getAndTranslateNextChapter(next)
+                    }
                 } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
                     setData(current)
                     setLatest({

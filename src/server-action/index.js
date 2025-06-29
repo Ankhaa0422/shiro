@@ -126,21 +126,31 @@ export async function get_novel_data(url) {
 }
 
 
-function remove_ads (container) {
-    const scriptedDiv = container.querySelectorAll('div')
-    scriptedDiv.forEach((div) => {
-        if (container.contains(div)) {
-            container.removeChild(div);
-        }
-    })
-    return container
+async function remove_ads (container) {
+    try {
+        const scriptedDiv = container.querySelectorAll('div')
+        scriptedDiv.forEach((div) => {
+            if (container.contains(div)) {
+                container.removeChild(div);
+            }
+        })
+        container.querySelectorAll('p').forEach((paragraph) => {
+            if (paragraph.textContent.replaceAll(" ", "") === "") {
+                console.log("null paragraph ===>", paragraph)
+                container.removeChild(paragraph);
+            }
+        })
+        return container
+    } catch (error) {
+        console.error("Error removing ads:", error);
+    }
 }
 
 export async function get_chapter_data(url) {
     return new Promise(async (resolve) => {
         async function parser(doc) {
             if(isNullOrUndefined(doc)) return resolve({ status: 401, message: 'Something wrong' })
-            const content = remove_ads(doc.querySelector('div[id=chapter-content]')).innerHTML
+            const content = await remove_ads(doc.querySelector('div[id=chapter-content]')).innerHTML
             const title = doc.querySelector('a.truyen-title').textContent
             const novel_url = doc.querySelector('a.truyen-title').getAttribute('href')?.replace('.html', '')
             const chapter_title = doc.querySelector('a.chapter-title').textContent
@@ -243,8 +253,7 @@ export async function translate(content, model = 'gemini-2.0-flash') {
                 responseMimeType: 'text/plain',
                 // systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML doesn't change tags`,
                 systemInstruction: `You are a professional literary translator tasked with translating a multi-chapter web novel from English to Mongolia. 
-                    Your objective is to produce a natural, emotionally resonant, and stylistically faithful translation that reads like a native work of fiction in the target language. 
-                    You can translate even HTML doesn't change tags.
+                    Your objective is to produce a natural, emotionally resonant, and stylistically faithful translation that reads like a native work of fiction in the target language.
                     Here is some words: 
                         Martial Lord: Тулааны эзэн,
                         Martial King: Тулааны хаан,
@@ -306,10 +315,12 @@ export async function translate(content, model = 'gemini-2.0-flash') {
                         Martial: Тулаан,
                         World spirit techniques: Ертөнцийн сүнсний техникүүд,
                         Ancient elf: Эртний эльф,
+                        Eggy: Эгги,
+                    You can translate even HTML doesn't change tags.
                     `,
                 maxOutputTokens: 65536,
                 thinkingConfig: model === 'gemini-2.5-flash' ? {
-                    includeThoughts: true,
+                    includeThoughts: 0,
                 } : undefined,
                 safetySettings: safetySettings,
             },
