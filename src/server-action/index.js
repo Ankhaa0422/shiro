@@ -237,7 +237,7 @@ const safetySettings = [
 export async function translate(content, model = 'gemini-2.0-flash') {
     try {
         const response = await ai.models.generateContent({
-            model: model === 'gemini-2.5-flash' ? 'gemini-2.5-flash-preview-05-20' : model,
+            model: model === 'gemini-2.5-flash' ? 'gemini-2.5-flash-lite-preview-06-17' : model,
             contents: [{role: 'user', parts: [{text: content}]}],
             config: {
                 responseMimeType: 'text/plain',
