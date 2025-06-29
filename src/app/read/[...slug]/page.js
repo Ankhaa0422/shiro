@@ -11,10 +11,7 @@ import { setCookie } from '@/lib'
 
 export default function Read({ params }) {
     const [data, setData] = useSetState(undefined)
-    const [model, setModel] = useLocalStorage({
-            key: 'model',
-            defaultValue: 'gemini-2.5-flash',
-        })
+    const [model, setModel] = useState(undefined)
     const [isLoading, setIsLoading] = useState(true)
     const [isTranslate, setIsTranslate] = useState(false)
     const [latest, setLatest] = useLocalStorage({
@@ -32,52 +29,59 @@ export default function Read({ params }) {
     useEffect(() => {
         async function getData() {
             try {
-                setIsLoading(true)
-                let next = await getChapter('nextChapter')
-                let current = await getChapter('currentChapter')
-                let previous = await getChapter('previousChapter')
-                const { slug } = await params
-                const response = await get_chapter_data(slug || '')
-                if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
-                    setData(next)
-                    setLatest({
-                        url: `${slug.join('/')}`,
-                        title: next['chapter_title']
-                    })
-                    setChapter(next, 'currentChapter')
-                    if(!isNullOrUndefined(next?.mnContent)) {
-                        getAndTranslateNextChapter(next)
-                    }
-                } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
-                    setData(current)
-                    setLatest({
-                        url: `${slug.join('/')}`,
-                        title: current['chapter_title']
-                    })
-                    setChapter(current, 'currentChapter')
-                    // getAndTranslateNextChapter(current)
-                } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
-                    setData(previous)
-                    setLatest({
-                        url: `${slug.join('/')}`,
-                        title: previous['chapter_title']
-                    })
-                    setChapter(previous, 'currentChapter')
-                    // getAndTranslateNextChapter(previous)
+                let localModel = window.localStorage.getItem('model')
+                if(isNullOrUndefined(localModel)) {
+                    localModel = 'gemini-2.0-flash'
+                    window.localStorage.setItem('model', localModel)
+                    setModel(localModel)
                 } else {
-                    setData(response)
-                    setLatest({
-                        url: `${slug.join('/')}`,
-                        title: response['chapter_title']
-                    })
-                    setChapter(response, 'currentChapter')
+                    setIsLoading(true)
+                    let next = await getChapter('nextChapter')
+                    let current = await getChapter('currentChapter')
+                    let previous = await getChapter('previousChapter')
+                    const { slug } = await params
+                    const response = await get_chapter_data(slug || '')
+                    if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
+                        setData(next)
+                        setLatest({
+                            url: `${slug.join('/')}`,
+                            title: next['chapter_title']
+                        })
+                        setChapter(next, 'currentChapter')
+                        if(!isNullOrUndefined(next?.mnContent)) {
+                            getAndTranslateNextChapter(next)
+                        }
+                    } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
+                        setData(current)
+                        setLatest({
+                            url: `${slug.join('/')}`,
+                            title: current['chapter_title']
+                        })
+                        setChapter(current, 'currentChapter')
+                        // getAndTranslateNextChapter(current)
+                    } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
+                        setData(previous)
+                        setLatest({
+                            url: `${slug.join('/')}`,
+                            title: previous['chapter_title']
+                        })
+                        setChapter(previous, 'currentChapter')
+                        // getAndTranslateNextChapter(previous)
+                    } else {
+                        setData(response)
+                        setLatest({
+                            url: `${slug.join('/')}`,
+                            title: response['chapter_title']
+                        })
+                        setChapter(response, 'currentChapter')
+                    }
                 }
             } finally {
                 setIsLoading(false)
             }
         }
         getData()
-    }, [router])
+    }, [model])
 
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
@@ -133,6 +137,7 @@ export default function Read({ params }) {
 
     async function getAndTranslateNextChapter(current = data, attempt = 0) {
         const response = await get_chapter_data(current?.['next_chapter'].replace('.html', '').split('/') || '')
+        console.log("response ===>", response)
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             const content = !current?.['mnContent'] ? response?.['content'] : `
                 I have previous of a story already translated into Mongolia in a specific literary and creative style. I now need to translate Current chapter and onward into the same language, using the same tone, vocabulary style, and literary voice established in previous chapter.

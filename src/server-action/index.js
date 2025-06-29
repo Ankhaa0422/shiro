@@ -126,31 +126,29 @@ export async function get_novel_data(url) {
 }
 
 
-async function remove_ads (container) {
-    try {
-        const scriptedDiv = container.querySelectorAll('div')
-        scriptedDiv.forEach((div) => {
-            if (container.contains(div)) {
-                container.removeChild(div);
-            }
-        })
-        container.querySelectorAll('p').forEach((paragraph) => {
-            if (paragraph.textContent.replaceAll(" ", "") === "") {
-                console.log("null paragraph ===>", paragraph)
-                container.removeChild(paragraph);
-            }
-        })
-        return container
-    } catch (error) {
-        console.error("Error removing ads:", error);
-    }
+function remove_ads (container) {
+    const scriptedDiv = container.querySelectorAll('div')
+    scriptedDiv.forEach((div) => {
+        if (container.contains(div)) {
+            container.removeChild(div);
+        }
+    })
+    const allP = container.querySelectorAll('p')
+    console.log("allP ===>", allP)
+    allP.forEach((paragraph) => {
+        if (paragraph.textContent.replaceAll(" ", "") === "") {
+            console.log("null paragraph ===>", paragraph)
+            container.removeChild(paragraph);
+        }
+    })
+    return container
 }
 
 export async function get_chapter_data(url) {
     return new Promise(async (resolve) => {
         async function parser(doc) {
             if(isNullOrUndefined(doc)) return resolve({ status: 401, message: 'Something wrong' })
-            const content = await remove_ads(doc.querySelector('div[id=chapter-content]')).innerHTML
+            const content = remove_ads(doc.querySelector('div[id=chapter-content]')).innerHTML
             const title = doc.querySelector('a.truyen-title').textContent
             const novel_url = doc.querySelector('a.truyen-title').getAttribute('href')?.replace('.html', '')
             const chapter_title = doc.querySelector('a.chapter-title').textContent
@@ -159,6 +157,7 @@ export async function get_chapter_data(url) {
             resolve({status: 200, content, next_chapter, prev_chapter, title, novel_url, chapter_title})
         }
         if(Array.isArray(url)) {
+            console.log("url ===>", url, `${url.join('/')}.html`)
             await parse_url(`${url.join('/')}.html`, parser)
         }
     })
@@ -246,6 +245,7 @@ const safetySettings = [
 
 export async function translate(content, model = 'gemini-2.0-flash') {
     try {
+        console.log("model ===>", model)
         const response = await ai.models.generateContent({
             model: model === 'gemini-2.5-flash' ? 'gemini-2.5-flash-lite-preview-06-17' : model,
             contents: [{role: 'user', parts: [{text: content}]}],
