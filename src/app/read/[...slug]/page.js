@@ -25,12 +25,23 @@ export default function Read({ params }) {
         getInitialValueInEffect: true,
     })
     const [page_font, setPageFont] = useState('Arial, sans-serif')
+    useEffect(() => {
+        let localModel = window.localStorage.getItem('model')
+        console.log("localMOdel ===>", localModel)
+        if(isNullOrUndefined(localModel)) {
+            localModel = 'gemini-2.5-pro'
+        }
+        setModel(localModel)
+        window.localStorage.setItem('model', localModel)
+    }, [])
     console.log('data ===>', data)
     useEffect(() => {
         async function getData() {
             try {
                 let localModel = window.localStorage.getItem('model')
+                console.log("localMOdel ===>", localModel)
                 if(isNullOrUndefined(localModel)) {
+                    console.log("localModel is null or undefined")
                     localModel = 'gemini-2.0-flash'
                     window.localStorage.setItem('model', localModel)
                     setModel(localModel)
@@ -82,7 +93,7 @@ export default function Read({ params }) {
         }
         getData()
     }, [model])
-
+    console.log("latest ===>", model)
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
 
@@ -104,7 +115,19 @@ export default function Read({ params }) {
     async function handleTranslate() {
         if(isNullOrUndefined(data?.content)) return null
         setIsTranslate(true)
-        const response = await translate(data?.content, model)
+        let localModel = window.localStorage.getItem('model')
+        console.log("localModel handletranslate ===>", localModel, model)
+        let response = undefined
+        if(isNullOrUndefined(localModel) && isNullOrUndefined(model)) {
+            localModel = "gemini-2.5-pro"
+            setModel(localModel)
+            response = await translate(data?.content, localModel)
+        } else {
+            let usingModel = localModel || model
+            console.log("usingModel ===>", usingModel)
+            response = await translate(data?.content, usingModel)
+        }
+        
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             if(response['content'] === data?.content) {
                 setIsTranslate(false)

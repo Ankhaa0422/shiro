@@ -11,7 +11,7 @@ export default function Navbar() {
     const { isLoggedIn, login, logout } = useAuth();
     const [model, setModel] = useLocalStorage({
         key: 'model',
-        defaultValue: 'gemini-2.0-flash',
+        defaultValue: 'gemini-2.5-flash',
     })
     const navItems = [
         { name: "Asura", link: "/martial-god-asura", },
@@ -30,6 +30,7 @@ export default function Navbar() {
                         isLoggedIn && <select name='aiModel' className="bg-transparent border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 z-40" value={model} onChange={(e) => setModel(e.target.value)}>
                             <option value="gemini-2.5-flash">gemini-2.5-flash</option>
                             <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                            <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                         </select>
                     }
                     <ThemeSwitcherButton />
@@ -58,6 +59,7 @@ export default function Navbar() {
                             isLoggedIn && <select name='aiModel' className="bg-transparent border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 z-40" value={model} onChange={(e) => setModel(e.target.value)}>
                                 <option value="gemini-2.5-flash">gemini-2.5-flash</option>
                                 <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                                <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                             </select>
                         }
                         <ThemeSwitcherButton />

@@ -243,11 +243,12 @@ const safetySettings = [
     },
 ]
 
-export async function translate(content, model = 'gemini-2.0-flash') {
+export async function translate(content, model = "gemini-2.5-flash") {
     try {
-        console.log("model ===>", model)
+        console.log("model serverside ===>", model)
+        debugger
         const response = await ai.models.generateContent({
-            model: model === 'gemini-2.5-flash' ? 'gemini-2.5-flash-lite-preview-06-17' : model,
+            model: model.replaceAll('"', ''),
             contents: [{role: 'user', parts: [{text: content}]}],
             config: {
                 responseMimeType: 'text/plain',
@@ -322,8 +323,8 @@ export async function translate(content, model = 'gemini-2.0-flash') {
                     You can translate even HTML doesn't change tags.
                     `,
                 maxOutputTokens: 65536,
-                thinkingConfig: model === 'gemini-2.5-flash' ? {
-                    includeThoughts: 0,
+                thinkingConfig: (model === 'gemini-2.5-flash' || model === 'gemini-2.5-pro') ? {
+                    includeThoughts: true,
                 } : undefined,
                 safetySettings: safetySettings,
             },
