@@ -36,54 +36,6 @@ export default function Read({ params }) {
     }, [])
     
     useEffect(() => {
-        // async function getData() {
-        //     try {
-        //         if(!isNullOrUndefined(model)) {
-        //             setIsLoading(true)
-        //             let next = await getChapter('nextChapter')
-        //             let current = await getChapter('currentChapter')
-        //             let previous = await getChapter('previousChapter')
-        //             const { slug } = await params
-        //             const response = await get_chapter_data(slug || '')
-        //             if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
-        //                 setData(next)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: next['chapter_title']
-        //                 })
-        //                 setChapter(next, 'currentChapter')
-        //                 if(!isNullOrUndefined(next?.mnContent)) {
-        //                     getAndTranslateNextChapter(next)
-        //                 }
-        //             } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
-        //                 setData(current)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: current['chapter_title']
-        //                 })
-        //                 setChapter(current, 'currentChapter')
-        //                 // getAndTranslateNextChapter(current)
-        //             } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
-        //                 setData(previous)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: previous['chapter_title']
-        //                 })
-        //                 setChapter(previous, 'currentChapter')
-        //                 // getAndTranslateNextChapter(previous)
-        //             } else {
-        //                 setData(response)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: response['chapter_title']
-        //                 })
-        //                 setChapter(response, 'currentChapter')
-        //             }
-        //         }
-        //     } finally {
-        //         setIsLoading(false)
-        //     }
-        // }
         async function getData() {
             try {
                 if(!isNullOrUndefined(model)) {
@@ -92,7 +44,8 @@ export default function Read({ params }) {
                     let current = await getChapter('currentChapter')
                     let previous = await getChapter('previousChapter')
                     const { slug } = await params
-                    const response = await get_chapter_fwn(slug || '')
+                    const response = await get_chapter_data(slug || '')
+                    console.log("response ===>", response)
                     if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
                         setData(next)
                         setLatest({
@@ -132,6 +85,54 @@ export default function Read({ params }) {
                 setIsLoading(false)
             }
         }
+        // async function getData() {
+        //     try {
+        //         if(!isNullOrUndefined(model)) {
+        //             setIsLoading(true)
+        //             let next = await getChapter('nextChapter')
+        //             let current = await getChapter('currentChapter')
+        //             let previous = await getChapter('previousChapter')
+        //             const { slug } = await params
+        //             const response = await get_chapter_fwn(slug || '')
+        //             if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
+        //                 setData(next)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: next['chapter_title']
+        //                 })
+        //                 setChapter(next, 'currentChapter')
+        //                 if(!isNullOrUndefined(next?.mnContent)) {
+        //                     getAndTranslateNextChapter(next)
+        //                 }
+        //             } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
+        //                 setData(current)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: current['chapter_title']
+        //                 })
+        //                 setChapter(current, 'currentChapter')
+        //                 // getAndTranslateNextChapter(current)
+        //             } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
+        //                 setData(previous)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: previous['chapter_title']
+        //                 })
+        //                 setChapter(previous, 'currentChapter')
+        //                 // getAndTranslateNextChapter(previous)
+        //             } else {
+        //                 setData(response)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: response['chapter_title']
+        //                 })
+        //                 setChapter(response, 'currentChapter')
+        //             }
+        //         }
+        //     } finally {
+        //         setIsLoading(false)
+        //     }
+        // }
         getData()
     }, [model])
     console.log("latest ===>", model)

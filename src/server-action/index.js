@@ -127,20 +127,15 @@ export async function get_novel_data(url) {
 
 
 function remove_ads (container) {
-    const scriptedDiv = container.querySelectorAll('div')
-    scriptedDiv.forEach((div) => {
-        if (container.contains(div)) {
-            container.removeChild(div);
+    // const scriptedDiv = [...container.querySelectorAll('div')]
+    // const iframes = [...container.querySelectorAll('iframe')]
+    let childNodes = [...container.childNodes]
+    childNodes.forEach((node) => {
+        if (node.nodeName === 'IFRAME' || node.nodeName === 'DIV' || (node.nodeName === 'P' && node.textContent.trim() === '')) {
+            container.removeChild(node)
         }
     })
-    const allP = container.querySelectorAll('p')
-    console.log("allP ===>", allP)
-    allP.forEach((paragraph) => {
-        if (paragraph.textContent.replaceAll(" ", "") === "") {
-            console.log("null paragraph ===>", paragraph)
-            container.removeChild(paragraph);
-        }
-    })
+    console.log("container ===>", container, container.childNodes)
     return container
 }
 
@@ -148,7 +143,7 @@ export async function get_chapter_data(url) {
     return new Promise(async (resolve) => {
         async function parser(doc) {
             if(isNullOrUndefined(doc)) return resolve({ status: 401, message: 'Something wrong' })
-            const content = remove_ads(doc.querySelector('div[id=chapter-content]')).innerHTML
+            const content = remove_ads(doc.querySelector('div[id=chapter-content]')).innerHTML.replaceAll("\t", "").replaceAll("<p>　</p>", "")
             const title = doc.querySelector('a.truyen-title').textContent
             const novel_url = doc.querySelector('a.truyen-title').getAttribute('href')?.replace('.html', '')
             const chapter_title = doc.querySelector('a.chapter-title').textContent

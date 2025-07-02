@@ -22,48 +22,48 @@ export default function page() {
         defaultValue: {},
     })
     useEffect(() => {
-        // async function getData() {
-        //     try {
-        //         setIsLoading(true)
-        //         // const urlParams = new URLSearchParams(window.location.search);
-        //         const page = queryParam.get('page');
-                
-        //         let url = pathname
-        //         if(!isNullOrUndefined(page)) {
-        //             url = `${url}.html?page=${page}`
-        //             setActive(page)
-        //         } else {
-        //             setActive('1')
-        //         }
-        //         const response = await get_novel_data(url)
-        //         if(response['status'] === 200) {
-        //             setData(response.data)
-        //             setChapters(response.chapter_list)
-        //             setPaginations(response.pagination_list)
-        //         }
-        //         setIsLoading(false)
-        //     } catch (error) {
-        //         console.error("Error fetching novel data:", error)
-        //     } finally {
-        //         setIsLoading(false)
-        //     }
-        // }
         async function getData() {
             try {
                 setIsLoading(true)
+                // const urlParams = new URLSearchParams(window.location.search);
+                const page = queryParam.get('page');
+                
                 let url = pathname
-                const response = await get_fwn_novel(`novel${url}-novel`)
-                console.log("response ===>", response)
+                if(!isNullOrUndefined(page)) {
+                    url = `${url}.html?page=${page}`
+                    setActive(page)
+                } else {
+                    setActive('1')
+                }
+                const response = await get_novel_data(url)
                 if(response['status'] === 200) {
                     setData(response.data)
                     setChapters(response.chapter_list)
+                    setPaginations(response.pagination_list)
                 }
+                setIsLoading(false)
             } catch (error) {
                 console.error("Error fetching novel data:", error)
             } finally {
                 setIsLoading(false)
             }
         }
+        // async function getData() {
+        //     try {
+        //         setIsLoading(true)
+        //         let url = pathname
+        //         const response = await get_fwn_novel(`novel${url}-novel`)
+        //         console.log("response ===>", response)
+        //         if(response['status'] === 200) {
+        //             setData(response.data)
+        //             setChapters(response.chapter_list)
+        //         }
+        //     } catch (error) {
+        //         console.error("Error fetching novel data:", error)
+        //     } finally {
+        //         setIsLoading(false)
+        //     }
+        // }
         getData()
     }, [queryParam])
 
@@ -118,7 +118,7 @@ export default function page() {
                         </div>
                     </div>
                     <div className='hidden md:flex flex-row gap-2 text-[0.8rem]'>
-                        {/* <div className='flex flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-1/2'>
+                        <div className='flex flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-1/2'>
                             {
                                 chapters.filter((data, idx) => idx < 25).map((chap, idx) => {
                                     return <div key={`chapter-${idx}`} className='w-full border-b-2 border-b-gray-200 hover:bg-cyan-50 dark:border-b-[#212729] cursor-pointer dark:hover:bg-[#21272980] py-1 px-2' onClick={() => routeChapter(chap.url)}>
@@ -126,10 +126,10 @@ export default function page() {
                                     </div>
                                 })
                             }
-                        </div> */}
+                        </div>
                         <div className='flex flex-col bg-white dark:bg-[#313739] rounded-xl p-2 w-1/2'>
                             {
-                                chapters.map((chap, idx) => {
+                                chapters.filter((data, idx) => idx >= 25).map((chap, idx) => {
                                     return <div key={`chapter-${idx}`} className='w-full border-b-2 border-b-gray-200 hover:bg-cyan-50 dark:border-b-[#212729] cursor-pointer dark:hover:bg-[#21272980] py-1 px-2 overflow-hidden' onClick={() => routeChapter(chap.url)}>
                                         <span className='overflow-hidden text-ellipsis whitespace-nowrap'>{chap.name}</span>
                                     </div>
@@ -146,7 +146,7 @@ export default function page() {
                             })
                         }
                     </div>
-                    {/* <div className='w-full h-fit flex flex-row items-center justify-center gap-2 px-5 text-[0.8rem] overflow-auto'>
+                    <div className='w-full h-fit flex flex-row items-center justify-center gap-2 px-5 text-[0.8rem] overflow-auto'>
                         {
                             paginations.map((page, idx) => {
                                 return <div key={`pagination-${idx}`} className={`cursor-pointer hover:underline p-2 px-3 rounded-xl bg-white/70 dark:bg-[#313739]/70 ${page?.name === active && '!bg-cyan-600 !text-[#efefef]'}`} onClick={() => router.push(page['url'].replace('.html', ''))}>
@@ -154,7 +154,7 @@ export default function page() {
                                 </div>
                             })
                         }
-                    </div> */}
+                    </div>
                 </div>
             </section>
         }
