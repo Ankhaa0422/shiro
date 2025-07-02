@@ -8,6 +8,7 @@ import { useLocalStorage, useSetState } from '@mantine/hooks'
 import { Loader } from '@/components'
 import { toast } from 'sonner'
 import { setCookie } from '@/lib'
+import { get_chapter_fwn } from '@/server-action/freeWebNovel'
 
 export default function Read({ params }) {
     const [data, setData] = useSetState(undefined)
@@ -27,31 +28,71 @@ export default function Read({ params }) {
     const [page_font, setPageFont] = useState('Arial, sans-serif')
     useEffect(() => {
         let localModel = window.localStorage.getItem('model')
-        console.log("localMOdel ===>", localModel)
         if(isNullOrUndefined(localModel)) {
             localModel = 'gemini-2.5-pro'
         }
         setModel(localModel)
         window.localStorage.setItem('model', localModel)
     }, [])
-    console.log('data ===>', data)
+    
     useEffect(() => {
+        // async function getData() {
+        //     try {
+        //         if(!isNullOrUndefined(model)) {
+        //             setIsLoading(true)
+        //             let next = await getChapter('nextChapter')
+        //             let current = await getChapter('currentChapter')
+        //             let previous = await getChapter('previousChapter')
+        //             const { slug } = await params
+        //             const response = await get_chapter_data(slug || '')
+        //             if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
+        //                 setData(next)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: next['chapter_title']
+        //                 })
+        //                 setChapter(next, 'currentChapter')
+        //                 if(!isNullOrUndefined(next?.mnContent)) {
+        //                     getAndTranslateNextChapter(next)
+        //                 }
+        //             } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
+        //                 setData(current)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: current['chapter_title']
+        //                 })
+        //                 setChapter(current, 'currentChapter')
+        //                 // getAndTranslateNextChapter(current)
+        //             } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
+        //                 setData(previous)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: previous['chapter_title']
+        //                 })
+        //                 setChapter(previous, 'currentChapter')
+        //                 // getAndTranslateNextChapter(previous)
+        //             } else {
+        //                 setData(response)
+        //                 setLatest({
+        //                     url: `${slug.join('/')}`,
+        //                     title: response['chapter_title']
+        //                 })
+        //                 setChapter(response, 'currentChapter')
+        //             }
+        //         }
+        //     } finally {
+        //         setIsLoading(false)
+        //     }
+        // }
         async function getData() {
             try {
-                let localModel = window.localStorage.getItem('model')
-                console.log("localMOdel ===>", localModel)
-                if(isNullOrUndefined(localModel)) {
-                    console.log("localModel is null or undefined")
-                    localModel = 'gemini-2.0-flash'
-                    window.localStorage.setItem('model', localModel)
-                    setModel(localModel)
-                } else {
+                if(!isNullOrUndefined(model)) {
                     setIsLoading(true)
                     let next = await getChapter('nextChapter')
                     let current = await getChapter('currentChapter')
                     let previous = await getChapter('previousChapter')
                     const { slug } = await params
-                    const response = await get_chapter_data(slug || '')
+                    const response = await get_chapter_fwn(slug || '')
                     if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
                         setData(next)
                         setLatest({
@@ -115,18 +156,7 @@ export default function Read({ params }) {
     async function handleTranslate() {
         if(isNullOrUndefined(data?.content)) return null
         setIsTranslate(true)
-        let localModel = window.localStorage.getItem('model')
-        console.log("localModel handletranslate ===>", localModel, model)
-        let response = undefined
-        if(isNullOrUndefined(localModel) && isNullOrUndefined(model)) {
-            localModel = "gemini-2.5-pro"
-            setModel(localModel)
-            response = await translate(data?.content, localModel)
-        } else {
-            let usingModel = localModel || model
-            console.log("usingModel ===>", usingModel)
-            response = await translate(data?.content, usingModel)
-        }
+        let response = await translate(data?.content, model)
         
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             if(response['content'] === data?.content) {
@@ -159,8 +189,7 @@ export default function Read({ params }) {
     }
 
     async function getAndTranslateNextChapter(current = data, attempt = 0) {
-        const response = await get_chapter_data(current?.['next_chapter'].replace('.html', '').split('/') || '')
-        console.log("response ===>", response)
+        const response = await get_chapter_fwn(current?.['next_chapter'].replace('.html', '').split('/') || '')
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             const content = !current?.['mnContent'] ? response?.['content'] : `
                 I have previous of a story already translated into Mongolia in a specific literary and creative style. I now need to translate Current chapter and onward into the same language, using the same tone, vocabulary style, and literary voice established in previous chapter.

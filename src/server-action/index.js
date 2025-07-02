@@ -245,8 +245,6 @@ const safetySettings = [
 
 export async function translate(content, model = "gemini-2.5-flash") {
     try {
-        console.log("model serverside ===>", model)
-        debugger
         const response = await ai.models.generateContent({
             model: model.replaceAll('"', ''),
             contents: [{role: 'user', parts: [{text: content}]}],
