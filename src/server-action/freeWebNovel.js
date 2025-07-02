@@ -6,6 +6,7 @@ async function parse_url(url = '', callback) {
         let req_url = `/fwn/${url}`
         req.open('GET', req_url, true)
         req.responseType = 'text'
+        req.withCredentials = true
         req.onreadystatechange = (e) => {
             if(req.readyState === 4) {
                 if(req.status === 200) {
