@@ -2,21 +2,39 @@ import { isNullOrUndefined } from "@/utility"
 
 async function parse_url(url = '', callback) {
     try {
-        const req = new XMLHttpRequest()
-        let req_url = `/fwn/${url}`
-        req.open('GET', req_url, true)
-        req.responseType = 'text'
-        req.withCredentials = true
-        req.onreadystatechange = (e) => {
-            if(req.readyState === 4) {
-                if(req.status === 200) {
-                    let parser = new DOMParser()
-                    let doc = parser.parseFromString(req.responseText, 'text/html')
-                    callback?.(doc)
-                }
+        let test = await fetch(`/fwn/${url}`, {
+            method: 'GET', 
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'text/html',
+                'Accept': 'text/html'
             }
+        })
+        console.log("test ===>", test)
+        if(test.status === 200) {
+            let text = await test.text()
+            let parser = new DOMParser()
+            let doc = parser.parseFromString(text, 'text/html')
+            callback?.(doc)
+        } else {
+            console.log('Error fetching URL:', test.status, test.statusText)
+            callback?.(null)
         }
-        req.send()
+        // const req = new XMLHttpRequest()
+        // let req_url = `/fwn/${url}`
+        // req.open('GET', req_url, true)
+        // req.responseType = 'text'
+        // req.withCredentials = true
+        // req.onreadystatechange = (e) => {
+        //     if(req.readyState === 4) {
+        //         if(req.status === 200) {
+        //             let parser = new DOMParser()
+        //             let doc = parser.parseFromString(req.responseText, 'text/html')
+        //             callback?.(doc)
+        //         }
+        //     }
+        // }
+        // req.send()
     } catch (error) {
         console.log('parser error ===>', error)
     }
