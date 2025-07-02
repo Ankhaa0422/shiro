@@ -190,7 +190,7 @@ export default function Read({ params }) {
     }
 
     async function getAndTranslateNextChapter(current = data, attempt = 0) {
-        const response = await get_chapter_fwn(current?.['next_chapter'].replace('.html', '').split('/') || '')
+        const response = await get_chapter_data(current?.['next_chapter'].replace('.html', '').split('/') || '')
         if(response?.['status'] === 200 && !isNullOrUndefined(response['content'])) {
             const content = !current?.['mnContent'] ? response?.['content'] : `
                 I have previous of a story already translated into Mongolia in a specific literary and creative style. I now need to translate Current chapter and onward into the same language, using the same tone, vocabulary style, and literary voice established in previous chapter.
