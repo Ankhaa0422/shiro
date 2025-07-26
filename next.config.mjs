@@ -19,7 +19,7 @@ const nextConfig = {
         return [
             {
                 source: '/nvl/:path*',
-                destination: 'https://novelfull.com/:path*',
+                destination: 'https://novelfull.net/:path*',
             },
             {
                 source: '/fwn/:path*',
