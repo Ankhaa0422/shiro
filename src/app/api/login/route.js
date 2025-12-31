@@ -5,7 +5,7 @@ export async function POST(req) {
         const body = await req.json()
         const { password } = body
         
-        if(password === 'RGFueWFAMjQ3') {
+        if(password === 'RGFueWFAMjQ3' || password === 'QnV5YW5hYUAxMjM=') {
             const cookieStore = await cookies();
             cookieStore.set('isLoggedIn', true, {
                 maxAge: 60 * 60 * 12
