@@ -215,7 +215,7 @@ export function get_chapter_list(url) {
         await parse_url(url, parser)
     })
 }
-const ai = new GoogleGenAI({ apiKey: 'AIzaSyCK93NvUnEW_JSIbbsluFr27hbgjv2uN-U' });
+const ai = new GoogleGenAI({ apiKey: 'AIzaSyDdkU8ePltJvbEzOnob43pT-bswDZn_Odc' });
 
 const safetySettings = [
     {
@@ -247,8 +247,7 @@ export async function translate(content, model = "gemini-2.5-flash") {
             contents: [{role: 'user', parts: [{text: content}]}],
             config: {
                 responseMimeType: 'text/plain',
-                // systemInstruction: `You are an expert literary translator with a deep understanding of both the source and target languages, and a keen sensitivity to cultural nuances and literary style. Your primary goal is to produce a Mongolian version of the novel that is not merely accurate in terms of plot and dialogue, but also captures the original author's voice, tone, and artistic intent. You can translate even HTML doesn't change tags`,
-                systemInstruction: `You are a professional literary translator tasked with translating a multi-chapter web novel from English to Mongolia. 
+                systemInstruction: `You are a professional literary translator tasked with translating a multi-chapter web novel from English to Mongolia. with literary editing. Your objective is to produce a natural, emotionally resonant, and stylistically faithful translation that reads like a native work of fiction in the target language. You have a deep understanding of both the source and target languages, as well as the cultural contexts in which they are used. You are skilled at capturing the original author's voice, tone, and artistic intent, while also ensuring that the translation is engaging and accessible to Mongolian readers. You can translate even HTML doesn't change tags.
                     Your objective is to produce a natural, emotionally resonant, and stylistically faithful translation that reads like a native work of fiction in the target language.
                     Here is some words: 
                         Martial Lord: Тулааны эзэн,
