@@ -71,10 +71,12 @@ export async function get_novel_data(url) {
             let img_url = doc.querySelector('div.book').firstChild.getAttribute('src')
             const infoList = doc.querySelector('div.info').childNodes
             let info_list = []
+            console.log(infoList)
             infoList.forEach((info) => {
-                let title = info.querySelector('h3').textContent.replace(':', '')
+                let title = info?.querySelector?.('h3').textContent.replace(':', '')
                 let other = []
-                if(info.lastChild.nodeName === 'A') {
+                console.log({info: info.lastChild})
+                if(info.lastChild?.nodeName === 'A') {
                     let alist = info.querySelectorAll('a')
                     alist.forEach((alink) => {
                         let info_url = alink.getAttribute('href')
