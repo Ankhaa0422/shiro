@@ -45,7 +45,6 @@ export default function Read({ params }) {
                     let previous = await getChapter('previousChapter')
                     const { slug } = await params
                     const response = await get_chapter_data(slug || '')
-                    console.log("response ===>", response)
                     if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
                         setData(next)
                         setLatest({
@@ -53,9 +52,9 @@ export default function Read({ params }) {
                             title: next['chapter_title']
                         })
                         setChapter(next, 'currentChapter')
-                        if(!isNullOrUndefined(next?.mnContent)) {
-                            getAndTranslateNextChapter(next)
-                        }
+                        // if(!isNullOrUndefined(next?.mnContent)) {
+                        //     getAndTranslateNextChapter(next)
+                        // }
                     } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
                         setData(current)
                         setLatest({
@@ -85,57 +84,9 @@ export default function Read({ params }) {
                 setIsLoading(false)
             }
         }
-        // async function getData() {
-        //     try {
-        //         if(!isNullOrUndefined(model)) {
-        //             setIsLoading(true)
-        //             let next = await getChapter('nextChapter')
-        //             let current = await getChapter('currentChapter')
-        //             let previous = await getChapter('previousChapter')
-        //             const { slug } = await params
-        //             const response = await get_chapter_fwn(slug || '')
-        //             if (!isNullOrUndefined(next) && response['chapter_title'] === next['chapter_title']) {
-        //                 setData(next)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: next['chapter_title']
-        //                 })
-        //                 setChapter(next, 'currentChapter')
-        //                 if(!isNullOrUndefined(next?.mnContent)) {
-        //                     getAndTranslateNextChapter(next)
-        //                 }
-        //             } else if (!isNullOrUndefined(current) && response['chapter_title'] === current['chapter_title']) {
-        //                 setData(current)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: current['chapter_title']
-        //                 })
-        //                 setChapter(current, 'currentChapter')
-        //                 // getAndTranslateNextChapter(current)
-        //             } else if (!isNullOrUndefined(previous) && response['chapter_title'] === previous['chapter_title']) {
-        //                 setData(previous)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: previous['chapter_title']
-        //                 })
-        //                 setChapter(previous, 'currentChapter')
-        //                 // getAndTranslateNextChapter(previous)
-        //             } else {
-        //                 setData(response)
-        //                 setLatest({
-        //                     url: `${slug.join('/')}`,
-        //                     title: response['chapter_title']
-        //                 })
-        //                 setChapter(response, 'currentChapter')
-        //             }
-        //         }
-        //     } finally {
-        //         setIsLoading(false)
-        //     }
-        // }
         getData()
     }, [model])
-    console.log("latest ===>", model)
+    
     function routeToNextOrPrevChapter(isPrev = false) {
         if(!data) return null
 
@@ -170,9 +121,9 @@ export default function Read({ params }) {
                 isTranslated: true
             }
             setData(translatedData)
-            setTimeout(() => {
-                getAndTranslateNextChapter(translatedData)
-            }, 100)
+            // setTimeout(() => {
+            //     getAndTranslateNextChapter(translatedData)
+            // }, 100)
             toast.success('Translation completed successfully!')
         } else {
             let translatedData = {
@@ -181,9 +132,9 @@ export default function Read({ params }) {
                 isTranslated: false
             }
             setData(translatedData)
-            setTimeout(() => {
-                getAndTranslateNextChapter(translatedData)
-            }, 100)
+            // setTimeout(() => {
+            //     getAndTranslateNextChapter(translatedData)
+            // }, 100)
             toast.error('Translation failed, please try again later!')
         }
         setIsTranslate(false)
@@ -284,10 +235,10 @@ export default function Read({ params }) {
                         <span onClick={() => {routeToNextOrPrevChapter(false)}} className={`px-5 py-1 w-[170px] text-[0.8rem] flex items-center justify-center rounded ${isNullOrUndefined(data?.next_chapter) ? 'bg-sky-200 cursor-not-allowed' : 'bg-sky-500 cursor-pointer'} text-white`}>Next chapter</span>
                     </div>
                     <div className='w-full pl-5 flex flex-row justify-end'>
-                        <span  className={`px-5 py-1 w-[200px] flex items-center justify-center rounded bg-sky-500 cursor-pointer text-white`} onClick={() => handleTranslate()}>
+                        {/* <span  className={`px-5 py-1 w-[200px] flex items-center justify-center rounded bg-sky-500 cursor-pointer text-white`} onClick={() => handleTranslate()}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="none"/><path fill="currentColor" d="M4.178 3.204a4.9 4.9 0 0 1 2.806 0h.001c1.028.305 1.602.935 1.885 1.638c.255.634.255 1.288.254 1.655v4.753a.75.75 0 0 1-1.5 0v-.005q-.27.148-.568.28c-.745.332-1.702.603-2.63.408c-1.203-.253-2.011-1.154-2.303-2.152c-.29-.996-.087-2.18.839-2.958c1.008-.849 2.165-1.052 3.175-1.01c.53.022 1.034.113 1.474.218a2.1 2.1 0 0 0-.133-.629c-.117-.292-.344-.589-.918-.759a3.42 3.42 0 0 0-2.662.302l-.028.017l-.002.002a.75.75 0 0 1-.852-1.235l.002-.001l.004-.003l.007-.005l.022-.014q.026-.018.068-.043q.085-.054.234-.13a5 5 0 0 1 .825-.329m1.897 4.108c-.763-.032-1.51.123-2.148.659c-.39.328-.52.856-.364 1.39c.155.531.573.978 1.17 1.104c.475.1 1.081-.029 1.714-.31a7 7 0 0 0 1.177-.681V7.585c-.465-.13-.996-.25-1.55-.273m7.907-1.263a.75.75 0 0 1 .435.967c-.059.154-.12.335-.18.522q.729-.113 1.453-.271a.75.75 0 0 1 .318 1.466c-.721.156-1.46.288-2.207.38q-.15.637-.248 1.181q.591-.089 1.14-.073a.75.75 0 0 1 1.473.204v.04c1.187.376 2.093 1.16 2.541 2.177c.402.91.403 1.958-.083 2.929c-.483.964-1.413 1.793-2.773 2.37a.75.75 0 0 1-.585-1.381c1.116-.474 1.73-1.089 2.016-1.66a1.9 1.9 0 0 0 .053-1.652c-.216-.489-.666-.956-1.325-1.243a7.06 7.06 0 0 1-1.816 3.506c.076.149.15.3.211.444a.75.75 0 1 1-1.38.59l-.028-.067a4.4 4.4 0 0 1-1.345.556c-.667.143-1.45.089-1.993-.464c-.799-.814-.83-2.135-.318-3.263c.442-.972 1.305-1.89 2.615-2.514q.096-.709.278-1.554q-.764.03-1.532-.018a.75.75 0 0 1 .094-1.497c.603.038 1.21.033 1.82-.006c.117-.404.26-.872.399-1.234a.75.75 0 0 1 .967-.435M11.833 12.6c-.564.412-.925.885-1.126 1.327c-.358.789-.191 1.374.023 1.593c.032.032.189.137.609.048c.287-.062.632-.206.992-.443a6 6 0 0 1-.344-1.087a7.3 7.3 0 0 1-.154-1.438m1.688 1.394a5.65 5.65 0 0 0 1.017-2.278c-.365 0-.76.044-1.185.144c-.053.804 0 1.398.1 1.863q.031.141.068.27"/></svg>
                             <span className='text-[0.8rem]'>Translate</span>
-                        </span>
+                        </span> */}
                     </div>
                 </div>
                 <div className='md:hidden w-[90%] h-[50px] sticky flex bottom-1 bg-white/70 dark:bg-[#212729]/70 bg-opacity-60 backdrop-blur rounded flex-row items-center justify-between px-2'
@@ -298,10 +249,10 @@ export default function Read({ params }) {
                         <span onClick={() => {routeToNextOrPrevChapter(false)}} className={`px-5 py-1 w-[50px] flex items-center justify-center rounded ${isNullOrUndefined(data?.next_chapter) ? 'bg-sky-200 cursor-not-allowed' : 'bg-sky-500 cursor-pointer'} text-white`}>{'>'}</span>
                     </div>
                     <div className='w-full'>
-                        <span  className={`px-5 py-1 w-[200px] flex items-center justify-center rounded bg-sky-500 cursor-pointer text-white`} onClick={() => handleTranslate()}>
+                        {/* <span  className={`px-5 py-1 w-[200px] flex items-center justify-center rounded bg-sky-500 cursor-pointer text-white`} onClick={() => handleTranslate()}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="none"/><path fill="currentColor" d="M4.178 3.204a4.9 4.9 0 0 1 2.806 0h.001c1.028.305 1.602.935 1.885 1.638c.255.634.255 1.288.254 1.655v4.753a.75.75 0 0 1-1.5 0v-.005q-.27.148-.568.28c-.745.332-1.702.603-2.63.408c-1.203-.253-2.011-1.154-2.303-2.152c-.29-.996-.087-2.18.839-2.958c1.008-.849 2.165-1.052 3.175-1.01c.53.022 1.034.113 1.474.218a2.1 2.1 0 0 0-.133-.629c-.117-.292-.344-.589-.918-.759a3.42 3.42 0 0 0-2.662.302l-.028.017l-.002.002a.75.75 0 0 1-.852-1.235l.002-.001l.004-.003l.007-.005l.022-.014q.026-.018.068-.043q.085-.054.234-.13a5 5 0 0 1 .825-.329m1.897 4.108c-.763-.032-1.51.123-2.148.659c-.39.328-.52.856-.364 1.39c.155.531.573.978 1.17 1.104c.475.1 1.081-.029 1.714-.31a7 7 0 0 0 1.177-.681V7.585c-.465-.13-.996-.25-1.55-.273m7.907-1.263a.75.75 0 0 1 .435.967c-.059.154-.12.335-.18.522q.729-.113 1.453-.271a.75.75 0 0 1 .318 1.466c-.721.156-1.46.288-2.207.38q-.15.637-.248 1.181q.591-.089 1.14-.073a.75.75 0 0 1 1.473.204v.04c1.187.376 2.093 1.16 2.541 2.177c.402.91.403 1.958-.083 2.929c-.483.964-1.413 1.793-2.773 2.37a.75.75 0 0 1-.585-1.381c1.116-.474 1.73-1.089 2.016-1.66a1.9 1.9 0 0 0 .053-1.652c-.216-.489-.666-.956-1.325-1.243a7.06 7.06 0 0 1-1.816 3.506c.076.149.15.3.211.444a.75.75 0 1 1-1.38.59l-.028-.067a4.4 4.4 0 0 1-1.345.556c-.667.143-1.45.089-1.993-.464c-.799-.814-.83-2.135-.318-3.263c.442-.972 1.305-1.89 2.615-2.514q.096-.709.278-1.554q-.764.03-1.532-.018a.75.75 0 0 1 .094-1.497c.603.038 1.21.033 1.82-.006c.117-.404.26-.872.399-1.234a.75.75 0 0 1 .967-.435M11.833 12.6c-.564.412-.925.885-1.126 1.327c-.358.789-.191 1.374.023 1.593c.032.032.189.137.609.048c.287-.062.632-.206.992-.443a6 6 0 0 1-.344-1.087a7.3 7.3 0 0 1-.154-1.438m1.688 1.394a5.65 5.65 0 0 0 1.017-2.278c-.365 0-.76.044-1.185.144c-.053.804 0 1.398.1 1.863q.031.141.068.27"/></svg>
                             <span className='text-[0.8rem]'>Translate</span>
-                        </span>
+                        </span> */}
                     </div>
                 </div>
             </>

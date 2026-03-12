@@ -311,7 +311,6 @@ export async function translate(content, model = "gemini-2.5-flash") {
             method: 'POST',
             body: JSON.stringify({ content, model })
         }).then(res => res.json())
-        console.log("data ===>", data)
         return data
     } catch (error) {
         return { status: 500, message: 'Translation failed', error: error.message}
